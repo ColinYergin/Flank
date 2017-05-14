@@ -3,7 +3,7 @@ var bodyParser = require('body-parser');
 var path = require('path');
 
 var server = express();
-var port = 8080;
+var port = (process.env.PORT || 8080);
 
 var activeGames = {};
 var validColors = {
