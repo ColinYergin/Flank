@@ -107,6 +107,7 @@ function alertListeners(game) {
 server.put('/Listen', function(req, res) {
 	console.log(req.body);
 	var game = validateGameReq(req, res);
+	if(!game) return;
 	if(req.body.movenum < game.moves.length) {
 		res.json({moves:game.moves});
 	} else {
@@ -118,6 +119,7 @@ server.put('/Listen', function(req, res) {
 server.put('/Move', function(req, res) {
 	console.log(req.body);
 	var game = validateGameReq(req, res);
+	if(!game) return;
 	if(isValidMove(game, req.body.move)) {
 		game.moves.push(req.body.move);
 		alertListeners(game);

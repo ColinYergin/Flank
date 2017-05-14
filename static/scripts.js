@@ -240,6 +240,7 @@ function StartListening() {
 	var xhr = new XMLHttpRequest();
 	xhr.open('PUT', 'Listen');
 	xhr.setRequestHeader('Content-Type', 'application/json');
+	xhr.timeout = 5000;
 	xhr.onreadystatechange = function() {
 		if(xhr.readyState === XMLHttpRequest.DONE) {
 			if(xhr.status === 200) {
@@ -257,6 +258,9 @@ function StartListening() {
 			}
 		}
 	};
+	xhr.ontimeout = function() {
+		setTimeout(StartListening, 0);
+	}
 	xhr.send(JSON.stringify({
 		color: networkInfo.color,
 		name: networkInfo.name,
@@ -269,6 +273,7 @@ function SendMove(move) {
 	var xhr = new XMLHttpRequest();
 	xhr.open('PUT', 'Move');
 	xhr.setRequestHeader('Content-Type', 'application/json');
+	xhr.timeout = 1000;
 	xhr.onreadystatechange = function() {
 		if(xhr.readyState === XMLHttpRequest.DONE) {
 			if(xhr.status === 200) {
@@ -284,6 +289,10 @@ function SendMove(move) {
 			}
 		}
 	};
+	xhr.ontimeout = function() {
+		recordError("Couldn't send move, retrying");
+		setTimeout(() => SendMove(move), 0);
+	}
 	xhr.send(JSON.stringify({
 		color: networkInfo.color,
 		name: networkInfo.name,
