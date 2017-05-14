@@ -1,0 +1,93 @@
+div {
+	-webkit-user-select: none;  /* Chrome all / Safari all */
+	-moz-user-select: none;     /* Firefox all */
+	-ms-user-select: none;      /* IE 10+ */
+	user-select: none;
+}
+body {
+	margin:0;
+	font-size: 1.5em;
+}
+td {
+	padding:0;
+}
+#Right {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 100vh;
+	background-color: #bbf;
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+#errors {
+	color: #F00;
+}
+.rform {
+	position:relative;
+	top: 1vh;
+	left: 1vh;
+	bottom: 1vh;
+	right: 1vh;
+}
+.eventbl {
+	position:absolute;
+	left:0; top:0;
+	text-align:center;
+	width: 100vh;
+	height: 100vh;
+	border-collapse: collapse;
+	display:flex;
+	flex-direction: column;
+}
+.boardRow {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: row;
+}
+.pieceRow {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: row;
+}
+.bcell {
+	flex-grow: 1;
+	overflow:hidden;
+	background-color: #fff09e;
+}
+.pieceCell {
+	flex-grow: 1;
+	overflow:hidden;
+	background-color: rgba(0,0,0,.00004);
+	display:flex;
+	position:relative;
+}
+.lbord {
+	border-left:1px solid black;
+}
+.ubord {
+	border-top:1px solid black;
+}
+.circle {
+	flex-grow:1;
+	position:absolute;
+	border-radius: 50%;
+	top:2px;
+	bottom:2px;
+	left:2px;
+	right:2px;
+	border: 1px solid black;
+}
+.b {
+	background-color:#000;
+}
+.w {
+	background-color:#FFF;
+}
+.optind {
+	position:absolute;
+	left:25%; right:25%; top:25%; bottom:25%;
+	background-color:rgba(100, 200, 120, .5);
+	border-radius: 10%;
+}

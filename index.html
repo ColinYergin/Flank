@@ -1,0 +1,39 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Go</title>
+  <meta name="description" content="Go">
+  <meta name="author" content="Colin Yergin">
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <script src="scripts.js"></script>
+
+  <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div id="board"></div>
+  <div id="Right">
+    <div id="scores">
+    White: <span id="wscore"></span><br>
+    Black: <span id="bscore"></span><br></div><br>
+    <div id="errors"><span id="lasterror"></span><br></div>
+    <div class="rform" id="NewGame">
+      Game Name: <input type="text" id="GameName">
+      <button type="button" onclick="JoinGameFormSubmit()">Join Game</button>
+      <form name="NewGameForm">
+      <label><input type="radio" name="color" value="random" checked> Random</label><br>
+      <label><input type="radio" name="color" value="white"> White<br></label>
+      <label><input type="radio" name="color" value="black"> Black<br></label>
+      </form>
+      <button type="button" onclick="NewGameFormSubmit()">New Game</button>
+    </div>
+    <div id="GameInfo" hidden="true">
+    Game name:<span id="game_info_name"></span><br>
+    Your color:<span id="game_info_color"></span><br>
+    </div>
+  </div>
+</body>
+</html>
