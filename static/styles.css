@@ -5,36 +5,42 @@
 	user-select: none;
 	position:relative;
 	overflow-x:hidden;
-	width: 75vh;
-	height: 75vh;
+	min-width: 100vh;
+	min-height: 100vh;
+	flex-grow:0;
+	flex-shrink:1;
 }
 #Right {
-	position: absolute;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 75vh;
+	font-size:1em;
+	display:flex;
+	flex-direction: column;
 	background-color: #bbf;
+	flex-grow:1;
 }
-@media all and (max-width: 90vh) {
-	#board {
-		width: 100vw;
-		height: 100vw;
-	}
-	#Right {
-		position: absolute;
-		top: 100vw;
-		right: 0;
-		bottom: 0;
-		left: 0;
-		background-color: #bbf;
-	}
+button {
+	font-size: 1em;
+	border-radius: 10%;
 }
 body {
 	margin:0;
 	font-size: 1.5em;
-	display: flex;
-	flex-flow: row wrap;
+	display:flex;
+	flex-direction:row;
+}
+@media all and (max-width: 120vh) {
+	#board {
+		min-width: 75vh;
+		min-height: 75vh;
+	}
+}
+@media all and (max-width: 100vh) {
+	#board {
+		min-width: 100vw;
+		min-height: 100vw;
+	}
+	body {
+		flex-direction:column;
+	}
 }
 td {
 	padding:0;

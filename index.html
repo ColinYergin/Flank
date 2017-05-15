@@ -18,18 +18,18 @@
   <div id="Right">
     <div id="scores">
     White: <span id="wscore"></span><br>
-    Black: <span id="bscore"></span><br></div><br>
+    Black: <span id="bscore"></span><br></div>
     <div id="errors"><span id="lasterror"></span><br></div>
     <div id="messages"><span id="joined"></span><br></div>
-    <div class="rform" id="NewGame">
-      <button type="button" onclick="AutoMatchFormSubmit()">Auto Match</button><br>
-      Game Name: <input type="text" id="GameName">
-      <button type="button" onclick="JoinGameFormSubmit()">Join Game</button>
-      <form name="NewGameForm">
+    <button type="button" onclick="AutoMatchFormSubmit()">Auto Match</button><br>
+    <form name="NewGameForm">
       <label><input type="radio" name="color" value="random" checked> Random</label><br>
       <label><input type="radio" name="color" value="white"> White<br></label>
       <label><input type="radio" name="color" value="black"> Black<br></label>
-      </form>
+    </form>
+    <div class="rform" id="NewGame">
+      Game Name: <input type="text" id="GameName">
+      <button type="button" onclick="JoinGameFormSubmit()">Join Game</button>
       <button type="button" onclick="NewGameFormSubmit()">New Game</button>
     </div>
     <div id="GameInfo" hidden="true">
