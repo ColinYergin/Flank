@@ -39,7 +39,7 @@ server.put('/NewGame', function(req, res) {
 		res.json({error:"Invalid color"});
 	} else {
 		var color = validColors[req.body.color]();
-		var keys = makeKeyPair()
+		var keys = makeKeyPair();
 		var gameobj = {
 			moves:[],
 			wkey: keys[0],

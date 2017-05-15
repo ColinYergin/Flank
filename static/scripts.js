@@ -1,5 +1,5 @@
 var players = {
-	b: "Random",
+	b: "Human",
 	w: "Human"
 };
 var Agents = {
@@ -16,6 +16,7 @@ var board = {
 	get turn() {return this.turns[this.turnind % this.turns.length];},
 	get nextturn() {return this.turns[(this.turnind+1)%this.turns.length];},
 	get prevturn() {return this.turns[(this.turnind+this.turns.length-1)%this.turns.length];},
+	history: [],
 	turnind: 0,
 	inRange(x, y) {return x >= 0 && x < this.width && y >= 0 && y < this.height;},
 	get: function(x, y) {return this[x+","+y];},
@@ -30,12 +31,12 @@ var board = {
 			piece.className = c + " circle";
 			square.appendChild(piece);
 		}
-		this.recordScore();
 	},
 	triggerNextTurn: function() {
 		Agents[players[this.turn]](this.turn);
 	},
 	doturn: function(action, trigger) {
+		this.history.push(action);
 		if(players[this.turn === "b"?"w":"b"] === "Network" && players[this.turn] === "Human") {
 			SendMove(action);
 		}
@@ -69,6 +70,7 @@ var board = {
 		this.set(Math.round(mid+1), this.height-1, "b");
 		UIoptions = [];
 		drawUIOptions();
+		this.history = [];
 		this.recordScore();
 	},
 	recordScore: function() {
@@ -77,7 +79,7 @@ var board = {
 	},
 	score: function(c) {
 		count = 0;
-		this.each(x=>count += x===c?1:0);
+		this.each((e,x,y)=>count += (b[x+","+y]||"").toUpperCase()===c.toUpperCase()?1:0);
 		return count;
 	},
 	each: function(cb) {
@@ -285,7 +287,7 @@ function SendMove(move) {
 				}
 			} else {
 				recordError("Couldn't send move, retrying");
-				setTimeout(() => SendMove(move), 0);
+				setTimeout(() => SendMove(move), 500);
 			}
 		}
 	};
