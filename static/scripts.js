@@ -79,7 +79,7 @@ var board = {
 	},
 	score: function(c) {
 		count = 0;
-		this.each((e,x,y)=>count += (b[x+","+y]||"").toUpperCase()===c.toUpperCase()?1:0);
+		this.each((e,x,y)=>count += e===c?1:0);
 		return count;
 	},
 	each: function(cb) {

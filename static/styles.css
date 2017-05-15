@@ -1,15 +1,11 @@
-div {
+#board {
 	-webkit-user-select: none;  /* Chrome all / Safari all */
 	-moz-user-select: none;     /* Firefox all */
 	-ms-user-select: none;      /* IE 10+ */
 	user-select: none;
-}
-body {
-	margin:0;
-	font-size: 1.5em;
-}
-td {
-	padding:0;
+	position:relative;
+	width: 100vh;
+	height: 100vh;
 }
 #Right {
 	position: absolute;
@@ -20,6 +16,31 @@ td {
 	background-color: #bbf;
 	overflow-y: scroll;
 	overflow-x: hidden;
+}
+@media all and (max-width: 100vh) {
+	#board {
+		width: 100vw;
+		height: 100vw;
+	}
+	#Right {
+		position: absolute;
+		top: 100vw;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background-color: #bbf;
+		overflow-y: scroll;
+		overflow-x: hidden;
+	}
+}
+body {
+	margin:0;
+	font-size: 1.5em;
+	display: flex;
+	flex-flow: row wrap;
+}
+td {
+	padding:0;
 }
 #errors {
 	color: #F00;
@@ -33,10 +54,8 @@ td {
 }
 .eventbl {
 	position:absolute;
-	left:0; top:0;
+	left:0; top:0; right:0; bottom:0;
 	text-align:center;
-	width: 100vh;
-	height: 100vh;
 	border-collapse: collapse;
 	display:flex;
 	flex-direction: column;
