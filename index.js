@@ -83,7 +83,9 @@ server.put('/JoinGame', function(req, res) {
 			key:   game.creator==="white"?game.bkey:game.wkey,
 			moves: game.moves,
 			name: req.body.name,
+			joined: game.joined,
 		});
+		alertListeners(game);
 	} else if(game) {
 		res.json({error:"This game has already been joined"});
 	} else {
@@ -102,7 +104,9 @@ server.put('/AutoMatch', function(req, res) {
 			key:   game.creator==="white"?game.bkey:game.wkey,
 			moves: game.moves,
 			name: autogame,
+			joined: game.joined,
 		});
+		alertListeners(game);
 		autogame = undefined;
 	} else {
 		var color = validColors.random();
@@ -116,6 +120,7 @@ server.put('/AutoMatch', function(req, res) {
 			key:   color==="white"?gameobj.wkey:gameobj.bkey,
 			moves: [],
 			name: autogame,
+			joined: gameobj.joined,
 		});
 	}
 });
@@ -141,7 +146,7 @@ function getTurn(game) {
 
 function alertListeners(game) {
 	game.listeners.forEach(l => {
-		l.json({moves:game.moves});
+		l.json({moves:game.moves, joined:game.joined});
 	});
 	game.listeners = [];
 }
@@ -151,7 +156,7 @@ server.put('/Listen', function(req, res) {
 	var game = validateGameReq(req, res);
 	if(!game) return;
 	if(req.body.movenum < game.moves.length) {
-		res.json({moves:game.moves});
+		res.json({moves:game.moves, joined:game.joined});
 	} else {
 		game.listeners.push(res);
 		console.log("added listener");

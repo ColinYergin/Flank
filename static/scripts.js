@@ -139,6 +139,15 @@ window.onload = () => {
 	Agents[players[board.turn]](board.turn);
 };
 
+function DrawJoined() {
+	if(networkInfo && networkInfo.joined) {
+		document.getElementById("joined").innerHTML = "Opponent has joined game";
+	} else {
+		
+		document.getElementById("joined").innerHTML = "";
+	}
+}
+
 function drawUIOptions() {
 	document.querySelectorAll(".optind").forEach(o=>o.parentNode.removeChild(o));
 	UIoptions.forEach(m => {
@@ -225,9 +234,11 @@ function SetupObject(res) {
 			key: res.key,
 			mycolor: colors[res.player],
 			color: res.player,
-			name: res.name
+			name: res.name,
+			joined: res.joined,
 		}
 		res.moves.forEach(m => board.doturn(m));
+		DrawJoined();
 		board.turnind = 0;
 		board.triggerNextTurn();
 		document.getElementById("NewGame").hidden = true;
@@ -253,9 +264,12 @@ function StartListening() {
 					for(var i = board.turnind; i < res.moves.length; ++i) {
 						board.doturn(res.moves[i], i+1===res.moves.length);
 					}
+					networkInfo.joined = res.joined;
+					DrawJoined();
 				}
 			} else if(xhr.status) {
 				console.log("failed with code", xhr.status);
+				recordError("Lost connection, retrying");
 				setTimeout(StartListening, 0);
 			}
 		}
@@ -263,7 +277,7 @@ function StartListening() {
 	xhr.ontimeout = function() {
 		console.log("timed out");
 		setTimeout(StartListening, 0);
-	}
+	};
 	xhr.send(JSON.stringify({
 		color: networkInfo.color,
 		name: networkInfo.name,
@@ -295,7 +309,7 @@ function SendMove(move) {
 	xhr.ontimeout = function() {
 		recordError("Couldn't send move, retrying");
 		setTimeout(() => SendMove(move), 0);
-	}
+	};
 	xhr.send(JSON.stringify({
 		color: networkInfo.color,
 		name: networkInfo.name,
