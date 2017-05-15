@@ -6,6 +6,7 @@ var server = express();
 var port = (process.env.PORT || 8080);
 
 var activeGames = {};
+var autogame = undefined;
 var validColors = {
 	white:  ()=>"white",
 	black:  ()=>"black",
@@ -31,6 +32,18 @@ server.get('/', function(req, res) {
 	res.sendFile('index.html', {root: __dirname});
 });
 
+function buildGame(creatorcolor) {
+	var keys = makeKeyPair();
+	return {
+		moves:[],
+		wkey: keys[0],
+		bkey: keys[1],
+		joined: false,
+		creator: creatorcolor,
+		listeners: [],
+	};
+}
+
 server.put('/NewGame', function(req, res) {
 	console.log(req.body);
 	if(activeGames[req.name]) {
@@ -39,15 +52,7 @@ server.put('/NewGame', function(req, res) {
 		res.json({error:"Invalid color"});
 	} else {
 		var color = validColors[req.body.color]();
-		var keys = makeKeyPair();
-		var gameobj = {
-			moves:[],
-			wkey: keys[0],
-			bkey: keys[1],
-			joined: false,
-			creator: color,
-			listeners: [],
-		};
+		var gameobj = buildGame(color);
 		activeGames[req.body.name] = gameobj;
 		res.json({
 			setup: "new",
@@ -75,6 +80,35 @@ server.put('/JoinGame', function(req, res) {
 		res.json({error:"This game has already been joined"});
 	} else {
 		res.json({error:"No game with that name exists"});
+	}
+});
+
+server.put('/AutoMatch', function(req, res) {
+	console.log(req.body);
+	if(autogame) {
+		var game = activeGames[autogame];
+		game.joined = true;
+		res.json({
+			setup: "new",
+			player:game.creator==="white"?"black":"white",
+			key:   game.creator==="white"?game.bkey:game.wkey,
+			moves: game.moves,
+			name: autogame,
+		});
+		autogame = undefined;
+	} else {
+		var color = validColors.random();
+		var gameobj = buildGame(color);
+		autogame = "autogame" + Math.random();
+		while(activeGames[autogame]) autogame = "autogame" + Math.random();
+		activeGames[autogame] = gameobj;
+		res.json({
+			setup: "new",
+			player:color,
+			key:   color==="white"?gameobj.wkey:gameobj.bkey,
+			moves: [],
+			name: autogame,
+		});
 	}
 });
 

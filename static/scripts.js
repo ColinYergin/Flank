@@ -254,13 +254,14 @@ function StartListening() {
 						board.doturn(res.moves[i], i+1===res.moves.length);
 					}
 				}
-			} else {
-				console.log("failed");
+			} else if(xhr.status) {
+				console.log("failed with code", xhr.status);
 				setTimeout(StartListening, 0);
 			}
 		}
 	};
 	xhr.ontimeout = function() {
+		console.log("timed out");
 		setTimeout(StartListening, 0);
 	}
 	xhr.send(JSON.stringify({
@@ -341,4 +342,22 @@ function JoinGameFormSubmit() {
 		}
 	};
 	xhr.send(JSON.stringify({color:color, name:name}));
+}
+
+function AutoMatchFormSubmit() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('PUT', 'AutoMatch');
+	xhr.setRequestHeader('Content-Type', 'application/json');
+	xhr.onreadystatechange = function() {
+		if(xhr.readyState === XMLHttpRequest.DONE) {
+			if(xhr.status === 200) {
+				var res = JSON.parse(xhr.responseText);
+				if(res.error) recordError(res.error);
+				else SetupObject(res);
+			} else {
+				recordError("Couldn't auto match");
+			}
+		}
+	};
+	xhr.send(JSON.stringify({}));
 }
