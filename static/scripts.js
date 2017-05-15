@@ -254,7 +254,6 @@ function SetupObject(res) {
 function StartListening() {
 	var ws = new WebSocket("ws" + String(document.location).substr(4) + "listen/");
 	ws.onmessage = msg => {
-		console.log(msg);
 		var res = JSON.parse(msg.data);
 		for(var i = board.turnind; i < res.moves.length; ++i) {
 			board.doturn(res.moves[i], i+1===res.moves.length);
