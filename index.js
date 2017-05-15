@@ -44,6 +44,13 @@ function buildGame(creatorcolor) {
 	};
 }
 
+function makeWord() {
+	var vowels = "aeiou";
+	var consonants = "bcdfghjklmnpqrstvwxyz";
+	var pick = str=>str.charAt(Math.floor(Math.random() * str.length));
+	return pick(consonants) + pick(vowels) + pick(consonants) + pick(vowels) + pick(consonants);
+}
+
 server.put('/NewGame', function(req, res) {
 	console.log(req.body);
 	if(activeGames[req.name]) {
@@ -68,6 +75,7 @@ server.put('/JoinGame', function(req, res) {
 	console.log(req.body);
 	var game = activeGames[req.body.name];
 	if(game && !game.joined) {
+		if(req.body.name === autogame) autogame = undefined;
 		game.joined = true;
 		res.json({
 			setup: "new",
@@ -99,8 +107,8 @@ server.put('/AutoMatch', function(req, res) {
 	} else {
 		var color = validColors.random();
 		var gameobj = buildGame(color);
-		autogame = "autogame" + Math.random();
-		while(activeGames[autogame]) autogame = "autogame" + Math.random();
+		autogame = makeWord();
+		while(activeGames[autogame]) autogame = makeWord();
 		activeGames[autogame] = gameobj;
 		res.json({
 			setup: "new",
