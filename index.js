@@ -1,8 +1,10 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var path = require('path');
+var enableWs = require('express-ws');
 
 var server = express();
+enableWs(server);
 var port = (process.env.PORT || 8080);
 
 var activeGames = {};
@@ -125,11 +127,11 @@ server.put('/AutoMatch', function(req, res) {
 	}
 });
 
-function validateGameReq(req, res) {
-	var game = activeGames[req.body.name];
+function validateGameReq(reqbdy, res) {
+	var game = activeGames[reqbdy.name];
 	if(!game) {
 		res.json({error:"No game with that name exists"});
-	} else if((req.body.color==="white"?game.wkey:game.bkey) !== req.body.key) {
+	} else if((reqbdy.color==="white"?game.wkey:game.bkey) !== reqbdy.key) {
 		res.json({error:"Incorrect key"});
 	}
 	return game;
@@ -144,13 +146,20 @@ function getTurn(game) {
 	return order[game.moves.length % order.length]
 }
 
-function alertListeners(game) {
-	game.listeners.forEach(l => {
-		l.json({moves:game.moves, joined:game.joined});
-	});
-	game.listeners = [];
+function removeClosed(game) {
+	game.listeners.filter(ws => ws.readyState !== 3);
 }
 
+function alertws(game, ws) {
+	ws.send(JSON.stringify({moves:game.moves, joined:game.joined}));
+}
+
+function alertListeners(game) {
+	game.listeners.forEach(l => {
+		alertws(game, l);
+	});
+}
+/*
 server.put('/Listen', function(req, res) {
 	console.log(req.body);
 	var game = validateGameReq(req, res);
@@ -161,11 +170,30 @@ server.put('/Listen', function(req, res) {
 		game.listeners.push(res);
 		console.log("added listener");
 	}
+});*/
+
+server.ws('/listen', function(ws, params) {
+	ws.on('message', msg => {
+		var req = JSON.parse(msg);
+		var res = {json(a){ws.send(JSON.stringify(a)); ws.close()}};
+		var game = validateGameReq(req, res);
+		if(game) {
+			if(req.movenum < game.moves.length) {
+				alertws(game, ws);
+			}
+			game.listeners.push(ws);
+			ws.game = game;
+		}
+	});
+	ws.on('close', () => {
+		setTimeout(() => removeClosed(ws.game), 0);
+		console.log("websocket closed");
+	})
 });
 
 server.put('/Move', function(req, res) {
 	console.log(req.body);
-	var game = validateGameReq(req, res);
+	var game = validateGameReq(req.body, res);
 	if(!game) return;
 	if(isValidMove(game, req.body.move)) {
 		game.moves.push(req.body.move);

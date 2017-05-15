@@ -5,7 +5,7 @@ var players = {
 var Agents = {
 	Human(c) {UIoptions = enumMoves(c);drawUIOptions();},
 	Random(c) {setTimeout(()=>RandomAgent(c),100);},
-	Network(c) {setTimeout(()=>StartListening(),0);}
+	Network(c) {}
 };
 var networkInfo = undefined;
 var UIoptions = [];
@@ -241,6 +241,8 @@ function SetupObject(res) {
 		DrawJoined();
 		board.turnind = 0;
 		board.triggerNextTurn();
+		StartListening();
+		Array.from(document.getElementsByClassName("gamecontrol")).forEach(x=>x.hidden = true);
 		document.getElementById("NewGame").hidden = true;
 		document.getElementById("GameInfo").hidden = false;
 		document.getElementById("lasterror").innerHTML = "";
@@ -250,40 +252,25 @@ function SetupObject(res) {
 }
 
 function StartListening() {
-	var xhr = new XMLHttpRequest();
-	xhr.open('PUT', 'Listen');
-	xhr.setRequestHeader('Content-Type', 'application/json');
-	xhr.timeout = 10000;
-	xhr.onreadystatechange = function() {
-		if(xhr.readyState === XMLHttpRequest.DONE) {
-			if(xhr.status === 200) {
-				var res = JSON.parse(xhr.responseText);
-				if(res.error) {
-					recordError(res.error);
-				} else {
-					for(var i = board.turnind; i < res.moves.length; ++i) {
-						board.doturn(res.moves[i], i+1===res.moves.length);
-					}
-					networkInfo.joined = res.joined;
-					DrawJoined();
-				}
-			} else if(xhr.status) {
-				console.log("failed with code", xhr.status);
-				recordError("Lost connection, retrying");
-				setTimeout(StartListening, 0);
-			}
+	var ws = new WebSocket("ws" + String(document.location).substr(4) + "listen/");
+	ws.onmessage = msg => {
+		console.log(msg);
+		var res = JSON.parse(msg.data);
+		for(var i = board.turnind; i < res.moves.length; ++i) {
+			board.doturn(res.moves[i], i+1===res.moves.length);
 		}
+		networkInfo.joined = res.joined;
+		DrawJoined();
 	};
-	xhr.ontimeout = function() {
-		console.log("timed out");
-		setTimeout(StartListening, 0);
-	};
-	xhr.send(JSON.stringify({
-		color: networkInfo.color,
-		name: networkInfo.name,
-		key: networkInfo.key,
-		movenum: board.turnind,
-	}));
+	ws.onclose = () => recordError("Lost connection to server");
+	ws.onerror = () => recordError("Error while waiting for moves");
+	ws.onopen = () => 
+		ws.send(JSON.stringify({
+			color: networkInfo.color,
+			name: networkInfo.name,
+			key: networkInfo.key,
+			movenum: board.turnind,
+		}));
 }
 
 function SendMove(move) {
