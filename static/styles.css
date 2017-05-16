@@ -48,10 +48,6 @@ td {
 #errors {
 	color: #F00;
 }
-.rform {
-	position:relative;
-	margin: 1vh;
-}
 .eventbl {
 	position:absolute;
 	left:0; top:0; right:0; bottom:0;

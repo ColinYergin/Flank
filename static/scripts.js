@@ -38,7 +38,7 @@ var board = {
 	doturn: function(action, trigger) {
 		this.history.push(action);
 		if(players[this.turn === "b"?"w":"b"] === "Network" && players[this.turn] === "Human") {
-			SendMove(action);
+			SendMove(action, this.turn);
 		}
 		if(action.type === "move") {
 			this.set(...action.from, undefined);
@@ -143,8 +143,14 @@ function DrawJoined() {
 	if(networkInfo && networkInfo.joined) {
 		document.getElementById("joined").innerHTML = "Opponent has joined game";
 	} else {
-		
-		document.getElementById("joined").innerHTML = "";
+		document.getElementById("joined").innerHTML = "Waiting for Opponent";
+	}
+	if(networkInfo && networkInfo.offerDraw && networkInfo.offerDraw !== networkInfo.mycolor) {
+		document.getElementById("drawOffer").innerHTML = "Opponent has offered a draw";
+		document.getElementById("offer_draw").innerHTML = "Declare Draw";
+	} else {
+		document.getElementById("drawOffer").innerHTML = "";
+		document.getElementById("offer_draw").innerHTML = "Offer Draw";
 	}
 }
 
@@ -238,17 +244,25 @@ function SetupObject(res) {
 			joined: res.joined,
 		}
 		res.moves.forEach(m => board.doturn(m));
+		console.log(networkInfo);
 		DrawJoined();
 		board.turnind = 0;
 		board.triggerNextTurn();
 		StartListening();
 		Array.from(document.getElementsByClassName("gamecontrol")).forEach(x=>x.hidden = true);
-		document.getElementById("NewGame").hidden = true;
 		document.getElementById("GameInfo").hidden = false;
+		document.getElementById("winner").innerHTML = "";
 		document.getElementById("lasterror").innerHTML = "";
 		document.getElementById("game_info_name").innerHTML = res.name;
 		document.getElementById("game_info_color").innerHTML = networkInfo.color;
 	}
+}
+
+function FinishGame(winner) {
+	document.getElementById("winner").innerHTML = "Winner: " + (winner==="w"?"White":winner==="b"?"Black":"Tie");
+	document.getElementById("GameInfo").hidden = true;
+	UIoptions = [];
+	Array.from(document.getElementsByClassName("gamecontrol")).forEach(x=>x.hidden = false);
 }
 
 function StartListening() {
@@ -259,7 +273,11 @@ function StartListening() {
 			board.doturn(res.moves[i], i+1===res.moves.length);
 		}
 		networkInfo.joined = res.joined;
+		networkInfo.offerDraw = res.offerDraw;
 		DrawJoined();
+		if(res.winner) {
+			FinishGame(res.winner);
+		}
 	};
 	ws.onclose = () => recordError("Lost connection to server");
 	ws.onerror = () => recordError("Error while waiting for moves");
@@ -272,7 +290,7 @@ function StartListening() {
 		}));
 }
 
-function SendMove(move) {
+function SendMove(move, turn) {
 	var xhr = new XMLHttpRequest();
 	xhr.open('PUT', 'Move');
 	xhr.setRequestHeader('Content-Type', 'application/json');
@@ -301,6 +319,8 @@ function SendMove(move) {
 		name: networkInfo.name,
 		key: networkInfo.key,
 		move: move,
+		turn: turn,
+		movenum: board.turnind,
 	}));
 }
 
@@ -360,4 +380,48 @@ function AutoMatchFormSubmit() {
 		}
 	};
 	xhr.send(JSON.stringify({}));
+}
+
+function ResignFormSubmit() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('PUT', 'Resign');
+	xhr.setRequestHeader('Content-Type', 'application/json');
+	xhr.onreadystatechange = function() {
+		if(xhr.readyState === XMLHttpRequest.DONE) {
+			if(xhr.status === 200) {
+				var res = JSON.parse(xhr.responseText);
+				if(res.error) recordError(res.error);
+			} else {
+				recordError("Couldn't resign, retrying");
+				setTimeout(ResignFormSubmit, 500);
+			}
+		}
+	};
+	xhr.send(JSON.stringify({
+		color: networkInfo.color,
+		name: networkInfo.name,
+		key: networkInfo.key
+	}));
+}
+
+function DrawFormSubmit() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('PUT', 'OfferDraw');
+	xhr.setRequestHeader('Content-Type', 'application/json');
+	xhr.onreadystatechange = function() {
+		if(xhr.readyState === XMLHttpRequest.DONE) {
+			if(xhr.status === 200) {
+				var res = JSON.parse(xhr.responseText);
+				if(res.error) recordError(res.error);
+			} else {
+				recordError("Couldn't offer draw, retrying");
+				setTimeout(DrawFormSubmit, 500);
+			}
+		}
+	};
+	xhr.send(JSON.stringify({
+		color: networkInfo.color,
+		name: networkInfo.name,
+		key: networkInfo.key
+	}));
 }

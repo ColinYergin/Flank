@@ -137,8 +137,8 @@ function validateGameReq(reqbdy, res) {
 	return game;
 }
 
-function isValidMove(game, move) {
-	return true;
+function isValidMove(game, move, turn) {
+	return getTurn(game) === turn;
 }
 
 function getTurn(game) {
@@ -151,7 +151,13 @@ function removeClosed(game) {
 }
 
 function alertws(game, ws) {
-	ws.send(JSON.stringify({moves:game.moves, joined:game.joined}));
+	if(ws.readyState === 1)
+		ws.send(JSON.stringify({
+			moves:game.moves, 
+			joined:game.joined,
+			winner: game.winner,
+			offerDraw: game.offerDraw
+		}));
 }
 
 function alertListeners(game) {
@@ -159,18 +165,6 @@ function alertListeners(game) {
 		alertws(game, l);
 	});
 }
-/*
-server.put('/Listen', function(req, res) {
-	console.log(req.body);
-	var game = validateGameReq(req, res);
-	if(!game) return;
-	if(req.body.movenum < game.moves.length) {
-		res.json({moves:game.moves, joined:game.joined});
-	} else {
-		game.listeners.push(res);
-		console.log("added listener");
-	}
-});*/
 
 server.ws('/listen', function(ws, params) {
 	ws.on('message', msg => {
@@ -195,13 +189,38 @@ server.put('/Move', function(req, res) {
 	console.log(req.body);
 	var game = validateGameReq(req.body, res);
 	if(!game) return;
-	if(isValidMove(game, req.body.move)) {
+	if(req.body.movenum !== game.moves.length) {
+		res.json({success: true});
+	} else if(isValidMove(game, req.body.move, req.body.turn)) {
 		game.moves.push(req.body.move);
 		alertListeners(game);
 		res.json({success: true});
 	} else {
 		res.json({error:"Invalid move"});
 	}
+});
+
+server.put('/Resign', function(req, res) {
+	console.log(req.body);
+	var game = validateGameReq(req.body, res);
+	if(!game) return;
+	game.winner = req.body.color ==="white"?"b":"w";
+	alertListeners(game);
+	res.json({success: true});
+});
+
+server.put('/OfferDraw', function(req, res) {
+	console.log(req.body);
+	var game = validateGameReq(req.body, res);
+	if(!game) return;
+	var color = req.body.color ==="white"?"w":"b";
+	if(game.offerDraw && game.offerDraw !== color) {
+		game.winner = "Tie";
+	} else if(!game.offerDraw) {
+		game.offerDraw = color;
+	}
+	alertListeners(game);
+	res.json({success: true});
 });
 
 server.listen(port, function() {

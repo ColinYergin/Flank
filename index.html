@@ -20,21 +20,13 @@
     White: <span id="wscore"></span><br>
     Black: <span id="bscore"></span><br></div>
     <div id="errors"><span id="lasterror"></span><br></div>
-    <div id="messages"><span id="joined"></span><br></div>
+    <div id="messages"><span id="joined"></span><br><span id="winner"></span><br><span id="drawOffer"></span><br></div>
     <button class="gamecontrol" type="button" onclick="AutoMatchFormSubmit()">Auto Match</button><br>
-    <form class="gamecontrol" name="NewGameForm">
-      <label><input type="radio" name="color" value="random" checked> Random</label><br>
-      <label><input type="radio" name="color" value="white"> White<br></label>
-      <label><input type="radio" name="color" value="black"> Black<br></label>
-    </form>
-    <div class="gamecontrol rform" id="NewGame">
-      Game Name: <input type="text" id="GameName">
-      <button type="button" onclick="JoinGameFormSubmit()">Join Game</button>
-      <button type="button" onclick="NewGameFormSubmit()">New Game</button>
-    </div>
     <div id="GameInfo" hidden="true">
     Game name:<span id="game_info_name"></span><br>
     Your color:<span id="game_info_color"></span><br>
+    <button id="resign" type="button" onclick="ResignFormSubmit()">Resign</button><br>
+    <button id="offer_draw" type="button" onclick="DrawFormSubmit()">Offer Draw</button><br>
     </div>
   </div>
 </body>
