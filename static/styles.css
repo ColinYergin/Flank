@@ -106,3 +106,17 @@ td {
 	background-color:rgba(100, 200, 120, .5);
 	border-radius: 10%;
 }
+.UIContainer {
+	padding:.5em;
+}
+.UIContainer:empty {
+	padding: 0;
+	display:none;
+}
+.rowFlex {
+	display:flex;
+	flex-direction: row;
+}
+.rowStretch {
+	flex-grow:1;
+}

@@ -16,17 +16,24 @@
 <body>
   <div id="board"></div>
   <div id="Right">
-    <div id="scores">
-    White: <span id="wscore"></span><br>
-    Black: <span id="bscore"></span><br></div>
-    <div id="errors"><span id="lasterror"></span><br></div>
-    <div id="messages"><span id="joined"></span><br><span id="winner"></span><br><span id="drawOffer"></span><br></div>
-    <button class="gamecontrol" type="button" onclick="AutoMatchFormSubmit()">Auto Match</button><br>
+    <div id="scores" class="UIContainer">
+      White: <span id="wscore"></span><br>
+      Black: <span id="bscore"></span><br>
+    </div>
+    <div id="errors" class="UIContainer">
+      <span id="lasterror"></span>
+    </div>
+    <div id="messages">
+      <div id="joined" class="UIContainer"></div>
+      <div id="winner" class="UIContainer"></div>
+      <div id="drawOffer" class="UIContainer"></div>
+    </div>
+    <div class="UIContainer gamecontrol"><button class="gamecontrol" type="button" onclick="AutoMatchFormSubmit()">Auto Match</button></div>
     <div id="GameInfo" hidden="true">
-    Game name:<span id="game_info_name"></span><br>
-    Your color:<span id="game_info_color"></span><br>
-    <button id="resign" type="button" onclick="ResignFormSubmit()">Resign</button><br>
-    <button id="offer_draw" type="button" onclick="DrawFormSubmit()">Offer Draw</button><br>
+    <div class="UIContainer">Game name: <span id="game_info_name"></span></div>
+    <div class="UIContainer">Your color: <span id="game_info_color"></span></div>
+    <div class="UIContainer rowFlex"><button class="rowStretch" id="resign" type="button" onclick="ResignFormSubmit()">Resign</button>
+    <button class="rowStretch" id="offer_draw" type="button" onclick="DrawFormSubmit()">Offer Draw</button></div>
     </div>
   </div>
 </body>
