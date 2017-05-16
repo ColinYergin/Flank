@@ -37,14 +37,20 @@ var board = {
 	},
 	doturn: function(action, trigger) {
 		this.history.push(action);
-		if(players[this.turn === "b"?"w":"b"] === "Network" && players[this.turn] === "Human") {
-			SendMove(action, this.turn);
-		}
 		if(action.type === "move") {
 			this.set(...action.from, undefined);
 			this.set(...action.to, this.turn);
 		} else if(action.type === "make") {
 			this.set(...action.loc, this.turn);
+		}
+		if(players[this.turn === "b"?"w":"b"] === "Network" && players[this.turn] === "Human") {
+			SendMove(action, this.turn);
+		} else if(players[this.turn] === "Network" && players[this.turn === "b"?"w":"b"] === "Human") {
+			var myscore = this.score(this.turn === "b"?"w":"b");
+			var theirscore = this.score(this.turn);
+			if(myscore < 2 || theirscore > this.width*this.height/2 || enumMoves().length === 0) {
+				setTimeout(ResignFormSubmit, 0);
+			}
 		}
 		this.turnind = this.turnind + 1;
 		this.recordScore();
@@ -143,7 +149,7 @@ function DrawJoined() {
 	if(networkInfo && networkInfo.joined) {
 		document.getElementById("joined").innerHTML = "Opponent has joined game";
 	} else {
-		document.getElementById("joined").innerHTML = "Waiting for Opponent";
+		document.getElementById("joined").innerHTML = "Opponent is not connected";
 	}
 	if(networkInfo && networkInfo.offerDraw && networkInfo.offerDraw !== networkInfo.mycolor) {
 		document.getElementById("drawOffer").innerHTML = "Opponent has offered a draw";
@@ -241,10 +247,9 @@ function SetupObject(res) {
 			mycolor: colors[res.player],
 			color: res.player,
 			name: res.name,
-			joined: res.joined,
+			joined: false
 		}
 		res.moves.forEach(m => board.doturn(m));
-		console.log(networkInfo);
 		DrawJoined();
 		board.turnind = 0;
 		board.triggerNextTurn();
@@ -258,9 +263,12 @@ function SetupObject(res) {
 	}
 }
 
-function FinishGame(winner) {
+function FinishGame(winner, ws) {
 	document.getElementById("winner").innerHTML = "Winner: " + (winner==="w"?"White":winner==="b"?"Black":"Tie");
 	document.getElementById("GameInfo").hidden = true;
+	document.getElementById("joined").innerHTML = "";
+	ws.onclose = () => {};
+	ws.close();
 	UIoptions = [];
 	Array.from(document.getElementsByClassName("gamecontrol")).forEach(x=>x.hidden = false);
 }
@@ -276,7 +284,7 @@ function StartListening() {
 		networkInfo.offerDraw = res.offerDraw;
 		DrawJoined();
 		if(res.winner) {
-			FinishGame(res.winner);
+			FinishGame(res.winner, ws);
 		}
 	};
 	ws.onclose = () => recordError("Lost connection to server");
@@ -302,7 +310,6 @@ function SendMove(move, turn) {
 				if(res.error) {
 					recordError(res.error);
 				} else {
-					console.log("sent move");
 				}
 			} else {
 				recordError("Couldn't send move, retrying");

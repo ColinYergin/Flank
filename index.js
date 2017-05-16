@@ -84,8 +84,7 @@ server.put('/JoinGame', function(req, res) {
 			player:game.creator==="white"?"black":"white",
 			key:   game.creator==="white"?game.bkey:game.wkey,
 			moves: game.moves,
-			name: req.body.name,
-			joined: game.joined,
+			name: req.body.name
 		});
 		alertListeners(game);
 	} else if(game) {
@@ -99,14 +98,12 @@ server.put('/AutoMatch', function(req, res) {
 	console.log(req.body);
 	if(autogame) {
 		var game = activeGames[autogame];
-		game.joined = true;
 		res.json({
 			setup: "new",
 			player:game.creator==="white"?"black":"white",
 			key:   game.creator==="white"?game.bkey:game.wkey,
 			moves: game.moves,
 			name: autogame,
-			joined: game.joined,
 		});
 		alertListeners(game);
 		autogame = undefined;
@@ -122,7 +119,6 @@ server.put('/AutoMatch', function(req, res) {
 			key:   color==="white"?gameobj.wkey:gameobj.bkey,
 			moves: [],
 			name: autogame,
-			joined: gameobj.joined,
 		});
 	}
 });
@@ -147,14 +143,16 @@ function getTurn(game) {
 }
 
 function removeClosed(game) {
-	game.listeners.filter(ws => ws.readyState !== 3);
+	var prelen = game.listeners.length;
+	game.listeners = game.listeners.filter(ws => ws.readyState !== 3);
+	if(game.listeners.length !== prelen) alertListeners(game);
 }
 
 function alertws(game, ws) {
 	if(ws.readyState === 1)
 		ws.send(JSON.stringify({
-			moves:game.moves, 
-			joined:game.joined,
+			moves:game.moves,
+			joined:game.listeners.length - 1,
 			winner: game.winner,
 			offerDraw: game.offerDraw
 		}));
@@ -178,6 +176,7 @@ server.ws('/listen', function(ws, params) {
 			game.listeners.push(ws);
 			ws.game = game;
 		}
+		alertListeners(game);
 	});
 	ws.on('close', () => {
 		setTimeout(() => removeClosed(ws.game), 0);
@@ -193,6 +192,7 @@ server.put('/Move', function(req, res) {
 		res.json({success: true});
 	} else if(isValidMove(game, req.body.move, req.body.turn)) {
 		game.moves.push(req.body.move);
+		game.offerDraw = undefined;
 		alertListeners(game);
 		res.json({success: true});
 	} else {
