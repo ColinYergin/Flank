@@ -168,17 +168,40 @@ function alertListeners(game) {
 }
 
 server.ws('/listen', function(ws, params) {
+	console.log("/listen");
 	ws.on('message', msg => {
 		var req = JSON.parse(msg);
-		var res = {json(a){ws.send(JSON.stringify(a)); ws.close()}};
+		var res = {json(a){}};
 		var game = validateGameReq(req, res);
 		if(game) {
-			if(req.movenum < game.moves.length) {
-				alertws(game, ws);
+			if(req.type === "register") {
+				if(req.movenum < game.moves.length) {
+					alertws(game, ws);
+				}
+				game.listeners.push(ws);
+				ws.game = game;
+				ws.color = req.color;
+			} else if(req.type === "move") {
+				if(isValidMove(game, req.move, req.turn)) {
+					game.moves.push(req.move);
+					if(game.offerDraw !== req.turn) game.offerDraw = undefined;
+					alertListeners(game);
+				}
+			} else if(req.type === "resign") {
+				game.winner = req.color ==="white"?"b":"w";
+				alertListeners(game);
+				res.json({success: true});
+			} else if(req.type === "offer_draw") {
+				var color = req.color ==="white"?"w":"b";
+				if(game.offerDraw && game.offerDraw !== color) {
+					game.winner = "Tie";
+				} else if(!game.offerDraw) {
+					game.offerDraw = color;
+				}
+				alertListeners(game);
+			} else {
+				res.json({error: "Unrecognized request type"});
 			}
-			game.listeners.push(ws);
-			ws.game = game;
-			ws.color = req.color;
 		}
 		alertListeners(game);
 	});
@@ -186,45 +209,6 @@ server.ws('/listen', function(ws, params) {
 		setTimeout(() => removeClosed(ws.game), 0);
 		console.log("websocket closed");
 	})
-});
-
-server.put('/Move', function(req, res) {
-	console.log(req.body);
-	var game = validateGameReq(req.body, res);
-	if(!game) return;
-	if(req.body.movenum !== game.moves.length) {
-		res.json({success: true});
-	} else if(isValidMove(game, req.body.move, req.body.turn)) {
-		game.moves.push(req.body.move);
-		game.offerDraw = undefined;
-		alertListeners(game);
-		res.json({success: true});
-	} else {
-		res.json({error:"Invalid move"});
-	}
-});
-
-server.put('/Resign', function(req, res) {
-	console.log(req.body);
-	var game = validateGameReq(req.body, res);
-	if(!game) return;
-	game.winner = req.body.color ==="white"?"b":"w";
-	alertListeners(game);
-	res.json({success: true});
-});
-
-server.put('/OfferDraw', function(req, res) {
-	console.log(req.body);
-	var game = validateGameReq(req.body, res);
-	if(!game) return;
-	var color = req.body.color ==="white"?"w":"b";
-	if(game.offerDraw && game.offerDraw !== color) {
-		game.winner = "Tie";
-	} else if(!game.offerDraw) {
-		game.offerDraw = color;
-	}
-	alertListeners(game);
-	res.json({success: true});
 });
 
 server.listen(port, function() {

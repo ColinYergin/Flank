@@ -282,6 +282,7 @@ function StartListening() {
 		}
 		networkInfo.joined = res.joined;
 		networkInfo.offerDraw = res.offerDraw;
+		networkInfo.ws = ws;
 		DrawJoined();
 		if(res.winner) {
 			FinishGame(res.winner, ws);
@@ -291,6 +292,7 @@ function StartListening() {
 	ws.onerror = () => recordError("Error while waiting for moves");
 	ws.onopen = () => 
 		ws.send(JSON.stringify({
+			type: "register",
 			color: networkInfo.color,
 			name: networkInfo.name,
 			key: networkInfo.key,
@@ -299,35 +301,32 @@ function StartListening() {
 }
 
 function SendMove(move, turn) {
-	var xhr = new XMLHttpRequest();
-	xhr.open('PUT', 'Move');
-	xhr.setRequestHeader('Content-Type', 'application/json');
-	xhr.timeout = 1000;
-	xhr.onreadystatechange = function() {
-		if(xhr.readyState === XMLHttpRequest.DONE) {
-			if(xhr.status === 200) {
-				var res = JSON.parse(xhr.responseText);
-				if(res.error) {
-					recordError(res.error);
-				} else {
-				}
-			} else {
-				recordError("Couldn't send move, retrying");
-				setTimeout(() => SendMove(move), 500);
-			}
-		}
-	};
-	xhr.ontimeout = function() {
-		recordError("Couldn't send move, retrying");
-		setTimeout(() => SendMove(move), 0);
-	};
-	xhr.send(JSON.stringify({
+	networkInfo.ws.send(JSON.stringify({
+		type: "move",
 		color: networkInfo.color,
 		name: networkInfo.name,
 		key: networkInfo.key,
 		move: move,
 		turn: turn,
 		movenum: board.turnind,
+	}));
+}
+
+function ResignFormSubmit() {
+	networkInfo.ws.send(JSON.stringify({
+		type: "resign",
+		color: networkInfo.color,
+		name: networkInfo.name,
+		key: networkInfo.key
+	}));
+}
+
+function DrawFormSubmit() {
+	networkInfo.ws.send(JSON.stringify({
+		type: "offer_draw",
+		color: networkInfo.color,
+		name: networkInfo.name,
+		key: networkInfo.key
 	}));
 }
 
@@ -387,48 +386,4 @@ function AutoMatchFormSubmit() {
 		}
 	};
 	xhr.send(JSON.stringify({}));
-}
-
-function ResignFormSubmit() {
-	var xhr = new XMLHttpRequest();
-	xhr.open('PUT', 'Resign');
-	xhr.setRequestHeader('Content-Type', 'application/json');
-	xhr.onreadystatechange = function() {
-		if(xhr.readyState === XMLHttpRequest.DONE) {
-			if(xhr.status === 200) {
-				var res = JSON.parse(xhr.responseText);
-				if(res.error) recordError(res.error);
-			} else {
-				recordError("Couldn't resign, retrying");
-				setTimeout(ResignFormSubmit, 500);
-			}
-		}
-	};
-	xhr.send(JSON.stringify({
-		color: networkInfo.color,
-		name: networkInfo.name,
-		key: networkInfo.key
-	}));
-}
-
-function DrawFormSubmit() {
-	var xhr = new XMLHttpRequest();
-	xhr.open('PUT', 'OfferDraw');
-	xhr.setRequestHeader('Content-Type', 'application/json');
-	xhr.onreadystatechange = function() {
-		if(xhr.readyState === XMLHttpRequest.DONE) {
-			if(xhr.status === 200) {
-				var res = JSON.parse(xhr.responseText);
-				if(res.error) recordError(res.error);
-			} else {
-				recordError("Couldn't offer draw, retrying");
-				setTimeout(DrawFormSubmit, 500);
-			}
-		}
-	};
-	xhr.send(JSON.stringify({
-		color: networkInfo.color,
-		name: networkInfo.name,
-		key: networkInfo.key
-	}));
 }
