@@ -258,12 +258,12 @@ function SetupObject(res) {
 		document.getElementById("GameInfo").hidden = false;
 		document.getElementById("winner").innerHTML = "";
 		document.getElementById("lasterror").innerHTML = "";
-		document.getElementById("game_info_name").innerHTML = res.name;
 		document.getElementById("game_info_color").innerHTML = networkInfo.color;
 	}
 }
 
 function FinishGame(winner, ws) {
+	console.log(winner);
 	document.getElementById("winner").innerHTML = "Winner: " + (winner==="w"?"White":winner==="b"?"Black":"Tie");
 	document.getElementById("GameInfo").hidden = true;
 	document.getElementById("joined").innerHTML = "";

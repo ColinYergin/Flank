@@ -46,11 +46,9 @@ function buildGame(creatorcolor) {
 	};
 }
 
-function makeWord() {
-	var vowels = "aeiou";
-	var consonants = "bcdfghjklmnpqrstvwxyz";
-	var pick = str=>str.charAt(Math.floor(Math.random() * str.length));
-	return pick(consonants) + pick(vowels) + pick(consonants) + pick(vowels) + pick(consonants);
+function makeGameId() {
+	if(this.counter === undefined) this.counter = 0;
+	return "id" + (this.counter++);
 }
 
 server.put('/NewGame', function(req, res) {
@@ -110,8 +108,8 @@ server.put('/AutoMatch', function(req, res) {
 	} else {
 		var color = validColors.random();
 		var gameobj = buildGame(color);
-		autogame = makeWord();
-		while(activeGames[autogame]) autogame = makeWord();
+		autogame = makeGameId();
+		while(activeGames[autogame]) autogame = makeGameId();
 		activeGames[autogame] = gameobj;
 		res.json({
 			setup: "new",
@@ -144,8 +142,13 @@ function getTurn(game) {
 
 function removeClosed(game) {
 	var prelen = game.listeners.length;
+	for(var i = 0; i < game.listeners.length; ++i) {
+		if(game.listeners[i].readyState === 3) {
+			game.winner = game.listeners[i].color==="white"?"b":"w";
+		}
+	}
 	game.listeners = game.listeners.filter(ws => ws.readyState !== 3);
-	if(game.listeners.length !== prelen) alertListeners(game);
+	alertListeners(game);
 }
 
 function alertws(game, ws) {
@@ -175,6 +178,7 @@ server.ws('/listen', function(ws, params) {
 			}
 			game.listeners.push(ws);
 			ws.game = game;
+			ws.color = req.color;
 		}
 		alertListeners(game);
 	});
