@@ -23,9 +23,20 @@ button {
 }
 body {
 	margin:0;
+	display:flex;
+	flex-direction:column;
+	height:100vh;
+}
+#bottomMargin {
+	flex-grow:1;
+	background-color:#bbf;
+}
+#HFlexWrapper {
+	margin:0;
 	font-size: 1.5em;
 	display:flex;
 	flex-direction:row;
+	flex-grow:0;
 }
 @media all and (max-width: 120vh) {
 	#board {
@@ -41,7 +52,7 @@ body {
 	html {
 		overflow-y: scroll;
 	}
-	body {
+	#HFlexWrapper {
 		flex-direction:column;
 	}
 }

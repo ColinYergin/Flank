@@ -14,26 +14,29 @@
   <![endif]-->
 </head>
 <body>
-  <div id="board"></div>
-  <div id="Right">
-    <div id="scores" class="UIContainer">
-      White: <span id="wscore"></span><br>
-      Black: <span id="bscore"></span><br>
-    </div>
-    <div id="errors" class="UIContainer">
-      <span id="lasterror"></span>
-    </div>
-    <div id="messages">
-      <div id="joined" class="UIContainer"></div>
-      <div id="winner" class="UIContainer"></div>
-      <div id="drawOffer" class="UIContainer"></div>
-    </div>
-    <div class="UIContainer gamecontrol"><button class="gamecontrol" type="button" onclick="AutoMatchFormSubmit()">Auto Match</button></div>
-    <div id="GameInfo" hidden="true">
-    <div class="UIContainer">Your color: <span id="game_info_color"></span></div>
-    <div class="UIContainer rowFlex"><button class="rowStretch" id="resign" type="button" onclick="ResignFormSubmit()">Resign</button>
-    <button class="rowStretch" id="offer_draw" type="button" onclick="DrawFormSubmit()">Offer Draw</button></div>
+  <div id="HFlexWrapper">
+    <div id="board"></div>
+    <div id="Right">
+      <div id="scores" class="UIContainer">
+        White: <span id="wscore"></span><br>
+        Black: <span id="bscore"></span><br>
+      </div>
+      <div id="errors" class="UIContainer">
+        <span id="lasterror"></span>
+      </div>
+      <div id="messages">
+        <div id="joined" class="UIContainer"></div>
+        <div id="winner" class="UIContainer"></div>
+        <div id="drawOffer" class="UIContainer"></div>
+      </div>
+      <div class="UIContainer gamecontrol"><button class="gamecontrol" type="button" onclick="AutoMatchFormSubmit()">Auto Match</button></div>
+      <div id="GameInfo" hidden="true">
+      <div class="UIContainer">Your color: <span id="game_info_color"></span></div>
+      <div class="UIContainer rowFlex"><button class="rowStretch" id="resign" type="button" onclick="ResignFormSubmit()">Resign</button>
+      <button class="rowStretch" id="offer_draw" type="button" onclick="DrawFormSubmit()">Offer Draw</button></div>
+      </div>
     </div>
   </div>
+  <div id="bottomMargin"></div>
 </body>
 </html>
