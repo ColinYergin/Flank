@@ -38,6 +38,9 @@ body {
 		min-width: 100vw;
 		min-height: 100vw;
 	}
+	html {
+		overflow-y: scroll;
+	}
 	body {
 		flex-direction:column;
 	}
